@@ -6,7 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of the womeninventoR package is to share a patent data set of
+The goal of the womeninventoR package is to share a patent dataset of
 women inventors for its analysis within R.
 
 ![](hexsticker_womeninventor.png)
