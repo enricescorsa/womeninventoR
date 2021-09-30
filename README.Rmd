@@ -29,8 +29,13 @@ See the initial bulk downloading process followed by Paul Oldham @poldham here: 
 
 The building of the patent dataset (´womeninventorpatents´) from the downloaded files is described in the ´DATASET.R´ file included in the ´data-raw´ folder.
 
-The data set contains nearly 400.000 granted patents by women inventors in the US within 2016 and 2020.
-It contains main patent data fields as columns (textual fields such as Title and Abstract and other useful metadata such as Patent Classification Codes, names of assignee organisations and publication dates)
+The data set contains 384,852 granted patents by women inventors in the US within 2016 and 2020.
+
+It includes patent references with data fields as columns (textual fields such as Title and Abstract and other useful metadata such as Patent Classification Codes, names of assignee organisations and publication dates).
+
+Plant variety patents are not included nor reissued patents which have also been filtered out (see the dataset compilation process described in the ´DATASET.R´ file).
+
+Note that the womeninventorpatents dataset is a large file (67,2 MB). 
 
 
 ## Installation
