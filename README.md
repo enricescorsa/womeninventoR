@@ -43,7 +43,7 @@ You can install it from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("enricescorsa/womeninventoRs")
+devtools::install_github("enricescorsa/womeninventoR")
 ```
 
 ## Example
@@ -72,8 +72,7 @@ womeninventorpatents
 #> #   patentsyear <chr>
 ```
 
-First, let’s see the evolution in the number of granted patents through
-time.
+Let’s see the evolution in the number of granted patents through time.
 
 We can plot a line chart showing the number of patents by year.
 
