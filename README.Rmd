@@ -44,7 +44,7 @@ devtools::install_github("enricescorsa/womeninventoRs")
 ```
 ## Example
 
-The womeninventoR package allows you to load the ´womeninventorpatents´  data set and analyse it.
+The womeninventoR package allows you to load the ´womeninventorpatents´  dataset and analyse it.
 
 ```{r example}
 library(womeninventoR)
@@ -57,14 +57,13 @@ First, let's see the evolution in the number of granted patents through time.
 
 We can plot a line chart showing the number of patents by year.
 
-```{r}
+```{r, message=FALSE}
 library(tidyverse)
+
 #first we count the number of patents by year
 patents_year <-  womeninventorpatents %>%
   group_by (patentsyear) %>%
   summarise (count=n ())
-
-patents_year <-  na.omit(patents_year) # we use na.omit to exclude missing values
 
 
 #then we can plot the line chart evolution
