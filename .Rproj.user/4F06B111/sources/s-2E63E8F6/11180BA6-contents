@@ -21,6 +21,7 @@ The goal of the womeninventoR package is to share a patent data set of women inv
 
 Data has been obtained from a a series of data tables that are available for bulk download from USPTO's Patentsview page here: https://patentsview.org/download/data-download-tables
 
+
 See the initial bulk downloading process followed by Paul Oldham @poldham here: https://github.com/poldham/patentsview2021/blob/master/patentsview_bulk.Rmd
 
 The building of the patent dataset (´womeninventorpatents´) from the downloaded files is described in the ´DATASET.R´ file included in the ´data-raw´ folder.

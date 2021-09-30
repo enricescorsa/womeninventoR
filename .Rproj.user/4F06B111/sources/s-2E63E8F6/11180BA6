@@ -3,7 +3,7 @@
     "path": "~/womeninventoR/README.Rmd",
     "project_path": "README.Rmd",
     "type": "r_markdown",
-    "hash": "2849063249",
+    "hash": "4010771825",
     "contents": "",
     "dirty": false,
     "created": 1632929020122.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "17,114",
-        "scrollLine": "9"
+        "cursorPosition": "22,0",
+        "scrollLine": "20"
     },
     "folds": "",
-    "lastKnownWriteTime": 1632981073,
+    "lastKnownWriteTime": 1632983670,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1632981073097,
+    "last_content_update": 1632983670448,
     "read_only": false,
     "read_only_alternatives": []
 }
