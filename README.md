@@ -31,11 +31,19 @@ fields such as Title and Abstract and other useful metadata such as
 Patent Classification Codes, names of assignee organisations and
 publication dates).
 
+The dataset is not completely tidy as for some variables -namely
+“assignee”, “inventors” and “ipc\_maingroups”- data appears concatenated
+within its column by a semicolon as separator.
+
 Plant variety patents are not included nor reissued patents which have
 also been filtered out (see the dataset compilation process described in
 the ´DATASET.R´ file).
 
 Note that the womeninventorpatents dataset is a large file (67,2 MB).
+
+Note also that the dataset may contain some false positives or non
+properly classified genders (p.e. we spotted inventor “Jordin T. Kare”
+classified as female).
 
 ## Installation
 
