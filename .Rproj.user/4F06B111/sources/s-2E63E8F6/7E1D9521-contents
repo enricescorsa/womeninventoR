@@ -1,0 +1,25 @@
+Package: womeninventoR
+Title: This package loads the womeninventorpatents dataset as a tibble that is ready for analysis within R.
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Enric",
+           family = "Escorsa",
+           role = c("aut", "cre"),
+           email = "enricescorsa@gmail.com",
+           comment = c(ORCID = "0000-0001-8411-6075"))
+Description: This package shares patent data from Women inventors obtained from USPTO's Patentsview page here: https://patentsview.org/download/data-download-table
+License: `use_mit_license()`, `use_gpl3_license()`
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Suggest:
+  dplyr,
+  readr,
+  stringr,
+  tidyr,
+  data.table
+Depends: 
+    R (>= 2.10)
+Imports: 
+    tibble

@@ -1,0 +1,241 @@
+---
+title: "Analysing_women_inventors_patents"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Text mining women inventors patents 
+
+## Introduction
+
+In this post we will analyze the women inventor patent dataset. We will deal with high volumes of data on inventions that have been patented by women over the years. We will obtain this data and try to read it and derive some insights in terms of main underlying trends, main topics covered, etc. We will do so by applying  text mining techniques; in particular, we will follow the `tidytextmining` approach, as proposed by @JuliaSilge.
+
+First of all, let's load and read our data.
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE}
+library(womeninventoR)
+womeninventorpatents
+
+```
+
+We have joined our women patents data to the overall patent dataset and obtained a patent dataset of women inventors containing nearly 1 Million patents.
+
+The first thing we need to do is loading all packages that are required for text processing.
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE}
+library(tidyverse)
+library(tm) #text mining package to build term frequency matrices
+library(tidytext) #to process text following a tidy approach
+library(topicmodels) #to do topic modeling using several techniques such as LDA
+library(widyr) #to create pair term co-ocurrency tables allowing to represent concept networks.
+```
+
+## Evolution of women's patentability
+
+First, let's see the evolution in the number of granted patents through time.
+
+We can plot a line chart showing the number of patents by year.
+
+```{r}
+
+#first we count the number of patents by year
+patents_year <-  women_inventor_patents_final %>%
+  group_by (patentsyear) %>%
+  summarise (count=n ())
+
+patents_year <-  na.omit(patents_year) # we use na.omit to exclude missing values
+
+
+#then we can plot the line chart evolution
+ggplot(data = patents_year, aes(x = patentsyear, y = count, group = 1)) +
+    geom_line(aes(color = '#660F56')) + 
+  theme_minimal() +
+  labs(y = "Nº Patents",
+       x = "Year",
+       title = "Evolution of patents by women",
+       subtitle = "Nº of granted patents by year") +
+  theme(legend.position = "none")
+
+```
+
+## Institutions of women inventors
+
+We can take the `assignees` column from the `womeninventors` dataset, and we use the `separate_rows` function to create a new column (we call it `applicant_cleaned`) with all the applicant names extracted from the separator (`;`) and arranged as new rows. We also further clean this column (with `mutate`) and use the `str_trim` function to make sure we remove white spaces from both before and after the applicant names and finally we use `drop_na` to get rid of missing (not available) entries. We call our resulting data `applicants_trimmed`.
+
+The whole process is described in the following script. Check it out:
+
+```{r concatenated, message=FALSE, comment=FALSE, warning=FALSE, echo=TRUE}
+institutions <-  women_inventor_patents_final %>% 
+   separate_rows(assignees, sep = ";") %>%
+   mutate(institutions_cleaned = str_trim(assignees, side =
+"both")) %>% drop_na(institutions_cleaned) 
+
+top_institutions <-  institutions %>%
+  group_by (institutions_cleaned) %>%
+  summarise (count=n ()) %>%sort(count)
+
+top_institutions
+```
+
+
+
+## Analysing contents patented by women
+
+
+To analyse text, we have to select the column field where the textual data we want to process is (in our case we will take the `abstract` field column)
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE}
+text <- women_inventor_patents_final$abstract
+head(text)
+```
+
+The next step is building our `text corpus`, that is, extract a list of all terms included in each patent. To do so we will take all the text contained in the abstract. For that We will use the `Corpus` function from the `tm` package.
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE}
+corpustext <- Corpus(VectorSource(text)) 
+#we remove punctuation (commas, dots, etc.)
+corpustext<- tm_map(corpustext, removePunctuation)
+```
+
+Then, we will transform our corpus into a document-term matrix (`dtm`). The Document-term matrix is a matrix that represents the frequency of occurrence of each term in each patent. We can then extract the terms from this matrix and list them into a tidy format, using the `tidy` function.
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE} 
+dtm <- DocumentTermMatrix(corpustext)
+ 
+text_clean <- tidy(dtm)
+```
+
+We can now order the terms to see the most frequent ones first.
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE} 
+text_clean %>%
+  count(term, sort = TRUE)
+```
+
+At this point, we can see that we have many non relevant words (stopwords) in our terms data. We can remove those by creating first a list of stopwords we do not want and then filtering out this list from our data using the `anti_join` function.
+
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE}
+mystopwords <- tibble(term = c(as.character(1:10), "the", "may", "comprising", "relates", "with", "within", "containing", "disclosed",  "corresponding", "provided", "disclosed", "include", "includes", "further",  "including", "and", "for", "this", "between", "than", "through", "but", "have", "been", "these", "that", "are", "from", "their", "such", "also", "then", "was", "were", "which", "has", "its", "this", "can", "paper", "study", "presents", "while", "[en]", "first", "second", "invention", "present", "wherein", "into", "discloses", "being", "model", "utility", "more", "provide", "provides", "plurality", "each", "when", "one", "provided", "comprises", "embodiment",  "having", "least", "other", "components", "retales", "includes", "abstract", "results", "found", "will", "considered", "showed","only", "various", "used", "proposed", "carried", "out", "using", "two", "order", "both" , "not" ,"well", "however", "due", "most", "main", "all", "based", "compared", "thereof", "legally", "said", "google", "translate", "googler","methods", "method", "same", "during", "over", "according", "another", "without", "about", "associated", "providing", "some", "embodiments", "whether", "herein", "described", "where"))
+
+text_clean_no_stopwords <- text_clean %>% anti_join(mystopwords)
+#save(text_clean_no_stopwords, file = "data/text_clean_no_stopwords.rda", compress = "xz")
+text_clean_no_stopwords
+```
+
+
+ 
+Now we can reorder again terms by frequency.
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE}
+text_clean_no_stopwords %>%
+  count(term, sort = TRUE)
+```
+
+
+## Wordcloud visualization
+
+We could now visualize these terms and frequencies through a wordcloud. Let's do it by using the `wordcloud` package:
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE}
+library(wordcloud)
+mypalette <- c("#280659", "#660F56", "#AE2D68") # we first define a palette with three colours
+text_clean_no_stopwords %>%
+  count(term) %>%
+  with(wordcloud(term, n, max.words = 95, colors = mypalette))
+```
+
+
+
+## Term co-ocurrencies network visualization
+
+To represent term co-ocurrencies (that is, terms jointly appearing in a patent) we need to create first a table containing pairs of terms and their frequency of co-ocurrency. We do that by using the `pairwise_count` function form the `widyr` package.
+
+
+```{r, warning=FALSE, message=FALSE, comment=FALSE} 
+text_pairs <- text_clean_no_stopwords %>%
+  pairwise_count(term, document, sort= TRUE, upper = FALSE)
+#with pairwise_count we simply count coocurrencies. With pairwise_cor we could compute correlation.
+text_pairs
+#save(text_pairs, file = "data/text_pairs.rda", compress = "xz")
+
+```
+
+See that the created table contains three columns: column `item1`, column `item2` and column `n` (frequency of joint occurrence of these two terms in a patent). 
+
+
+Finally we can visualise top term co-ocurrencies on all of our patents, through a network graph generated with the graph packages `igraph` and `ggraph`, together with the visualization library `ggplot`.
+
+``````{r, warning=FALSE, message=FALSE, comment=FALSE}
+
+library(igraph)
+library(ggplot2)
+library(ggraph)
+ 
+set.seed(1234)
+text_pairs %>%
+  filter(n >= 3500) %>% #we filter top most frequent terms
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "#660F56") +
+  geom_node_point(size = 1) +
+  geom_node_text(aes(label = name), repel = TRUE,
+                 point.padding = unit(0.2, "lines")) +
+  labs(title = "word co-ocurrency network") +
+  theme_void()
+```
+
+
+
+## Clustering topics
+
+Let's now try to see implicit content groups or topics in our data. What we are actually attempting to do is known as `topic modeling`, that is, applying statistical techniques allowing us to discover hidden semantically similar groups in our text body. 
+One of the modeling techniques we  can use for that purpose is the LDA algorithm. [LDA,  (Latent_Dirichlet_allocation)](https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation) is a statistical modeling technique widely used for  topic modeling. LDA basically assumes that each document is a mixture of a small number of topics and that each word in a document (in a patent in our case) is attributable to one of the document's topics.
+Based on that, we can specify a given number of topic clusters and let LDA to generate groups of topics and assign representative words of these topics.   
+
+Let's do it. First of all, we need to transform back our dataset to a dtm matrix (inversely as done before). We do so by using the cast_dtm function
+
+```{r}
+clean_dtm <- text_clean_no_stopwords %>%
+  cast_dtm(document, term, count)
+```
+
+
+We can now apply LDA to this matrix. We decide to do 6 topics or clusters.
+
+```{r}
+lda_clean <- LDA(clean_dtm, k = 6, control = list(alpha = 0.1)) #we decide to do 6 topics or clusters (k=6)
+ 
+# then we extract the probability of a word belonging to a topic (this is known as beta)
+topics_clean <- tidy(lda_clean, matrix = "beta")
+topics_clean
+```
+
+Now we can visualize top terms of each cluster through frequency bars.
+We take top 10 terms for each topic
+
+```{r}
+top_terms_by_cluster <- topics_clean  %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+top_terms_by_cluster
+```
+
+and we represent them with ggplot through differentiated facets for each topic
+
+```{r}
+top_terms_by_cluster %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() + theme_minimal()
+```
+
+
